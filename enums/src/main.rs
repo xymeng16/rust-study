@@ -27,14 +27,14 @@ fn main() {
     let message = Message::Move { x: 1, y: 2 };
     message.call();
 
-    let some_number = Some(1);
-    let some_string = Some(String::from("Hello"));
-    let absent_number: Option<String> = None; // use None need to explicitly indicate the type
+    let _some_number = Some(1);
+    let _some_string = Some(String::from("Hello"));
+    let _absent_number: Option<String> = None; // use None need to explicitly indicate the type
 
 
     let x:i8 = 5;
     let y:Option<i8> = Some(5);
 
     // let sum = x + y; // not work, you cannot add i8 to Option<i8>
-    let sum = x + y.expect("something wrong happened");
+    let _sum = x + y.expect("something wrong happened");
 }
