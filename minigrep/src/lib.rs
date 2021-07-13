@@ -1,6 +1,13 @@
+//! # minigrep
+//!
+//! `minigrep` is a tiny but useful globally regex expression print utility
+//! implemented in Rust.
+
 use std::env;
 use std::error::Error;
 use std::fs;
+
+pub use self::Config as Cfg;
 
 #[cfg(test)]
 mod tests {
@@ -73,7 +80,8 @@ impl Config {
     //         case_sensitive,
     //     });
     // }
-    pub fn new(mut args: env::Args) -> Result<Config, &'static str> { // we'd like this method accepts an iterator to save clone
+    pub fn new(mut args: env::Args) -> Result<Config, &'static str> {
+        // we'd like this method accepts an iterator to save clone
         // the lifetime of the return str should be static since we only return string literals
         // constructor
         args.next(); // the first arg is the executable name
@@ -98,6 +106,19 @@ impl Config {
     }
 }
 
+/// Search a string in all lines of the contents
+///
+/// # Examples
+/// ```
+/// let query = "duct";
+/// let contents = "\
+/// Rust:
+/// safe, fast, productive.
+/// Pick three.
+/// Duct tape.";
+/// let results = minigrep::search(query, contents);
+/// assert_eq!(results, vec!["safe, fast, productive."]);
+/// ```
 pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     // since the returned &str is borrowed from contents, they should have the same lifetime
     /* Ref from https://doc.rust-lang.org/book/ch12-04-testing-the-librarys-functionality.html
