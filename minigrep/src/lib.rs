@@ -58,15 +58,38 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn new(args: &Vec<String>) -> Result<Config, &str> {
+    // pub fn new(args: &Vec<String>) -> Result<Config, &str> { // we'd like this method accepts an iterator to save clone
+    //     // constructor
+    //     if args.len() < 3 {
+    //         return Err("not enough arguments");
+    //     }
+    //
+    //     let query = args[1].clone();
+    //     let filename = args[2].clone();
+    //     let case_sensitive = env::var("CASE_INSENSITIVE").is_err(); // if CASE_INSENSITICE is not set, return true
+    //     return Ok(Config {
+    //         query,
+    //         filename,
+    //         case_sensitive,
+    //     });
+    // }
+    pub fn new(mut args: env::Args) -> Result<Config, &'static str> { // we'd like this method accepts an iterator to save clone
+        // the lifetime of the return str should be static since we only return string literals
         // constructor
-        if args.len() < 3 {
-            return Err("not enough arguments");
-        }
+        args.next(); // the first arg is the executable name
 
-        let query = args[1].clone();
-        let filename = args[2].clone();
+        let query = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a query string"),
+        };
+
+        let filename = match args.next() {
+            Some(arg) => arg,
+            None => return Err("Didn't get a file name"),
+        };
+
         let case_sensitive = env::var("CASE_INSENSITIVE").is_err(); // if CASE_INSENSITICE is not set, return true
+
         return Ok(Config {
             query,
             filename,
@@ -83,13 +106,16 @@ pub fn search<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
     The data referenced by a slice needs to be valid for the reference to be valid; if the compiler
     assumes we’re making string slices of query rather than contents, it will do its safety checking incorrectly.
      */
-    let mut results = Vec::new();
-    for line in contents.lines() {
-        if line.contains(query) {
-            results.push(line);
-        }
-    }
-    return results;
+    // let mut results = Vec::new();
+    // for line in contents.lines() {
+    //     if line.contains(query) {
+    //         results.push(line);
+    //     }
+    // }
+    contents
+        .lines()
+        .filter(|line| line.contains(query))
+        .collect()
 }
 
 pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a str> {
@@ -101,13 +127,15 @@ pub fn search_case_insensitive<'a>(query: &str, contents: &'a str) -> Vec<&'a st
     assumes we’re making string slices of query rather than contents, it will do its safety checking incorrectly.
      */
     let query = query.to_lowercase(); // old &str query is moved
-    let mut results = Vec::new();
 
-    for line in contents.lines() {
-        if line.to_lowercase().contains(&query) {
-            results.push(line);
-        }
-    }
-
-    return results;
+    // for line in contents.lines() {
+    //     if line.to_lowercase().contains(&query) {
+    //         results.push(line);
+    //     }
+    // }
+    contents
+        .lines()
+        .filter(|line| line.to_lowercase().contains(&query))
+        .collect()
+    // return results;
 }
