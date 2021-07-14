@@ -25,4 +25,11 @@ fn main() {
 
     Rc::list_rc();
     Rc::count_rc();
+
+    RefCell::refcell_in_rc();
+
+    ref_cycle::ref_cycle();
+
+    ref_cycle::make_tree();
+    ref_cycle::make_tree2();
 }

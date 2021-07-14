@@ -9,6 +9,7 @@
 //! scenarios.
 use std::rc::Rc;
 use crate::List::{Cons, Nil};
+use std::borrow::Borrow;
 
 #[cfg(test)]
 mod tests {
@@ -28,6 +29,7 @@ pub fn list_rc() {
     let a = Rc::new(Cons(5, Rc::new(Cons(10, Rc::new(Nil)))));
     let b = Cons(3, Rc::clone(&a)); // Rc::clone() only increments the reference count.
     let c = Cons(4, Rc::clone(&a));
+    // *a.borrow() += 10;
 }
 /// Cloning an `Rc<T>` increases the reference count
 pub fn count_rc() {

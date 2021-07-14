@@ -19,6 +19,10 @@ name = "RefCell"
 version = "0.1.0"
 
 [[package]]
+name = "ref_cycle"
+version = "0.1.0"
+
+[[package]]
 name = "smart_pointers"
 version = "0.1.0"
 dependencies = [
@@ -26,4 +30,5 @@ dependencies = [
  "Drop",
  "Rc",
  "RefCell",
+ "ref_cycle",
 ]

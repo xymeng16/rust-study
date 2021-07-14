@@ -10,3 +10,4 @@ Box = { path = "src/Box" }
 Drop = { path = "src/Drop" }
 Rc = { path = "src/Rc" }
 RefCell = { path = "src/RefCell" }
+ref_cycle = { path = "src/ref_cycle" }
