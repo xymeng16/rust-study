@@ -1,12 +1,40 @@
-use serde::{Serialize, Deserialize};
+use rand::{
+    distributions::{Distribution, Standard},
+    Rng,
+};
+use serde::{Deserialize, Serialize};
 use std::fs::File;
-use std::io::prelude::*;
-use rand::{distributions::{Distribution, Standard}, Rng};
-use std::io::Bytes;
-use bson::to_bson;
 
-// #[derive(Read, Write)]
-// struct DataType(Vec<Move>);
+#[derive(Serialize, Deserialize, Debug)]
+struct DataType {
+    data: Vec<Move>,
+    cursor: usize,
+}
+
+// impl Read for DataType {
+//     fn read(&mut self, buf: &mut [u8]) -> std::io::Result<usize> {
+//         // read all of self into buf
+//         let encode: Vec<u8> = bincode::serialize(&self.data).unwrap();
+//         // what is the buf size?
+//         println!("buf.len() = {}, encode.len() = {}, self.cursor = {}", buf.len(), encode.len(), self.cursor);
+//
+//         buf.copy_from_slice(&encode.as_slice()[self.cursor..(self.cursor + buf.len())]);
+//
+//         self.cursor += buf.len();
+//
+//         Ok(buf.len())
+//     }
+// }
+//
+// impl Write for DataType {
+//     fn write(&mut self, buf: &[u8]) -> std::io::Result<usize> {
+//         todo!()
+//     }
+//
+//     fn flush(&mut self) -> std::io::Result<()> {
+//         todo!()
+//     }
+// }
 
 #[derive(Serialize, Deserialize, Debug, Copy, Clone)]
 struct Move {
@@ -41,55 +69,25 @@ impl Distribution<Direction> for Standard {
     }
 }
 
+/// 1. use a wrapper type that implements Serialize and Deserialize
+/// 2. to_document then to_writer to serialize
+/// 3. from_reader then from_document to deserialize
 fn main() {
+    let a = data_gen(1000);
 
-    let mut a = data_gen(1000);
-
-    println!("a[10] = {:?}", a[100]);
     let mut file = File::create("a.bson").unwrap();
 
-    let b: bson::Bson = bson::to_bson(&a).unwrap();
-
-    println!("{:?}", b.as_array().unwrap()[0]);
-
+    bson::to_document(&a).unwrap().to_writer(&mut file).unwrap();
 
     let mut file = File::open("a.bson").unwrap();
 
-    let deserialized = bson::Document::from_reader(&mut file).unwrap();
+    let deserialized: DataType =
+        bson::from_document(bson::Document::from_reader(&mut file).unwrap()).unwrap();
 
-    println!("deserialized[10] = {:?}", deserialized);
-
-    // let mut a: [Move; 1000] = [Move {
-    //     direction: Direction::Right,
-    //     distance: 10,
-    // }; 1000];
-    //
-    // let mut file = File::create("a.bson").unwrap();
-    //
-    // // let doc = bson::Document::from_reader(&mut a.as_slice()).unwrap();
-    //
-    // for m in a {
-    //     let b: bson::Bson = bson::to_bson(&m).unwrap();
-    //     b.as_document().unwrap().to_writer(&mut file);
-    //     // file.write(Bytes::from(bson::to_bson(&m).unwrap().into()));
-    //     // println!("{:?}", bson::to_bson(&m).unwrap().to_string());
-    // }
-    // // file.write(bson::to_bson(&a).unwrap().to_string().as_bytes());
-    //
-    // let mut file = File::open("a.bson").unwrap();
-    // let len_per_record= file.metadata().unwrap().len() / 1000;
-    // for i in 0..1000 {
-    //     let d = bson::Document::from_reader(&mut file).unwrap();
-    //     let a: bson::Bson = bson::from_document(d).unwrap();
-    //     // let mut s = String::new();
-    //     // file.read_to_string(&mut s);
-    //     // let b: bson::Bson = s[(i) as usize..(i + len_per_record) as usize].into();
-    //     // let a: Move = bson::from_bson(b).unwrap();
-    //     println!("{:?}", a);
-    // }
+    println!("deserialized[10] = {:?}", deserialized.data[10]);
 }
 
-fn data_gen(num: usize) -> Vec<Move> {
+fn data_gen(num: usize) -> DataType {
     let mut ret = Vec::with_capacity(num);
 
     for i in 0..num {
@@ -99,5 +97,8 @@ fn data_gen(num: usize) -> Vec<Move> {
         });
     }
 
-    ret
+    DataType {
+        data: ret,
+        cursor: 0,
+    }
 }
