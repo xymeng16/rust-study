@@ -76,7 +76,8 @@ fn main() {
     let a = data_gen(1000);
 
     let mut file = File::create("a.bson").unwrap();
-
+    let ll = bson::to_document(&a).unwrap().len();
+    println!("ll {}", std::mem::size_of_val(&a.data[0]));
     bson::to_document(&a).unwrap().to_writer(&mut file).unwrap();
 
     let mut file = File::open("a.bson").unwrap();
