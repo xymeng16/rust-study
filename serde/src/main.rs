@@ -77,13 +77,17 @@ fn main() {
 
     let mut file = File::create("a.bson").unwrap();
     let ll = bson::to_document(&a).unwrap().len();
-    println!("ll {}", std::mem::size_of_val(&a.data[0]));
-    bson::to_document(&a).unwrap().to_writer(&mut file).unwrap();
+    let mut buf: Vec<u8> = Vec::with_capacity(50000);
+    println!("before: file size {}", buf.len());
 
-    let mut file = File::open("a.bson").unwrap();
+    bson::to_document(&a).unwrap().to_writer(&mut buf).unwrap();
+    println!("after: file size {}",buf.len());
 
+    // let b = bson::to_bson(&a).unwrap();
+    // let mut file = File::open("a.bson").unwrap();
+    //
     let deserialized: DataType =
-        bson::from_document(bson::Document::from_reader(&mut file).unwrap()).unwrap();
+        bson::from_document(bson::Document::from_reader(&mut buf).unwrap()).unwrap();
 
     println!("deserialized[10] = {:?}", deserialized.data[10]);
 }
@@ -93,7 +97,7 @@ fn data_gen(num: usize) -> DataType {
 
     for i in 0..num {
         ret.push(Move {
-            direction: rand::random(),
+            direction: Direction::Down,
             distance: i as u32,
         });
     }
